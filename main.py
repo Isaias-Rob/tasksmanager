@@ -3,14 +3,21 @@ from kivymd.uix.screen import Screen
 from kivymd.uix.screenmanager import ScreenManager
 from kivymd.uix.list import ThreeLineIconListItem, IconLeftWidget
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty
 from datetime import datetime
+from kivy.uix.popup import Popup
 import sqlite3
 
 #RECICYCLE VIEW SERA IMPLEMENTADO NO FUTURO
 
 conn = sqlite3.connect('.\\tasks.db')
 conn.close()
+
+class PopupDetalhes(Popup):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.id_task = NumericProperty(None)
+        self.widget_task = ObjectProperty(None)
 
 class TaskIco(IconLeftWidget):
     id_task = ObjectProperty(None)
@@ -46,14 +53,18 @@ class TasksList(Screen):
         int_widget = widget.tertiary_text[4:]
         conn = sqlite3.connect('.\\tasks.db')
         cur = conn.cursor()
-        cur.execute("""SELECT subtitulo_tarefa FROM Tarefas WHERE id_tarefa = ?;
+        cur.execute("""SELECT id_tarefa, nome_tarefa, subtitulo_tarefa FROM Tarefas WHERE id_tarefa = ?;
         """, [int_widget])
         detalhes = cur.fetchone()
-        pop = Factory.PopupDetalhes()
-        pop.ids.label_detalhes.text = str(detalhes[0])
+        pop = PopupDetalhes()
+        pop.id_task = int(detalhes[0])
+        pop.title = str(detalhes[1])
+        pop.title_size = 18
+        pop.ids.label_detalhes.text = str(detalhes[2])
         if widget.bg_color == [0.0, 0.5019607843137255, 0.0, 1.0]:
             pop.title_color = (0, 1, 0, 1)
             pop.separator_color = (0, 1, 0, 1)
+        pop.widget_task = widget
         pop.open()
         conn.close()
 
@@ -77,6 +88,15 @@ class TasksList(Screen):
         conn.commit()
         conn.close()
 
+    def delete_task(self, id, widget):
+        conn = sqlite3.connect('.\\tasks.db')
+        cur = conn.cursor()
+        cur.execute("""DELETE FROM Tarefas WHERE id_tarefa = ?""", [int(id)])
+        conn.commit()
+        conn.close()
+        self.ids.list_view.remove_widget(widget)
+
+
 class CreateTask(Screen):
     def insert_task(self):
         nome_task = self.ids.nome_tarefa.text
@@ -93,6 +113,10 @@ class CreateTask(Screen):
                         """, (nome_task, desc_task, data_hoje))
             conn.commit()
             conn.close()
+            self.ids.nome_tarefa.text = 'Nome da tarefa'
+            self.ids.descricao_tarefa.text='Descricao da tarefa'
+            Factory.PopupTarefaCriada().open()
+
 
 class TaskOrganizerApp(MDApp):
     title = 'Task Organizer'

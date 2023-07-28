@@ -17,7 +17,6 @@
     auto_dismiss: False
     size_hint: 0.8, 0.8
     pos_hint: {'center_x': 0.5}
-    title: 'Detalhes da Tarefa'
     BoxLayout:
         orientation: 'vertical'
         ScrollView:
@@ -28,10 +27,35 @@
                 size_hint: 1, None
                 text_size: self.width, None
                 height: self.texture_size[1]
+        BoxLayout:
+            orientation:'horizontal'
+            MDIconButton:
+                icon:'keyboard-backspace'
+                size_hint: 0.2,0.1
+                pos_hint:{'center_x':0.25}
+                on_release: root.dismiss()
+            MDIconButton:
+                icon: 'trash-can-outline'
+                size_hint: 0.2,0.1
+                pos_hint:{'center_x':0.75}
+                on_release: 
+                    app.root.get_screen('TasksList').delete_task(root.id_task, root.widget_task)
+                    root.dismiss()
+
+<PopupTarefaCriada@Popup>:
+    auto_dismiss: False
+    size_hint: 0.6, 0.4
+    pos_hint: {'x': 0.2, 'top': 0.9}
+    title: 'Tarefa criada!'
+    title_color: (0, 1, 0, 1)
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'A tarefa foi criada com sucesso!'
         Button:
             text:'Fechar'
-            font_size: 24
-            size_hint: 0.6,0.1
+            font_size: 11
+            size_hint: 0.4,0.2
             pos_hint:{'center_x':0.5}
             on_release: root.dismiss()
 
