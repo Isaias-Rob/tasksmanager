@@ -13,6 +13,29 @@
             font_size: 24
             on_release: root.dismiss()
 
+<PopupConfirmaExclusao@Popup>:
+    auto_dismiss: False
+    size_hint: 0.6, 0.4
+    pos_hint: {'x': 0.2, 'top': 0.9}
+    title: 'Cuidado!'
+    StackLayout:
+        Label:
+            text: 'Confirma Exclusão?\nEssa ação não pode ser desfeita.'
+            size_hint: 1, 0.7
+            text_size: self.width, None
+            height: self.texture_size[1]
+            pos_hint:{'center_y':0.5}
+        MDIconButton:
+            icon:'close'
+            size_hint: 0.5,None
+            on_release: root.dismiss()
+        MDIconButton:
+            icon: 'check'
+            size_hint: 0.5,None
+            on_release:
+                app.root.get_screen('TasksList').confirm_delete_task(root.id_task, root.widget_task)
+                root.dismiss()
+
 <PopupDetalhes@Popup>:
     auto_dismiss: False
     size_hint: 0.8, 0.8
@@ -24,6 +47,7 @@
             size_hint: 1,0.9
             Label:
                 id: label_detalhes
+                text: root.detalhes_task
                 size_hint: 1, None
                 text_size: self.width, None
                 height: self.texture_size[1]
@@ -34,6 +58,9 @@
         MDIconButton:
             icon: 'pencil-outline'
             size_hint: 0.33,None
+            on_release:
+                app.root.get_screen('TasksList').edit_task(root.id_task, root.widget_task)
+                root.dismiss()
         MDIconButton:
             icon: 'trash-can-outline'
             size_hint: 0.33,None
@@ -58,6 +85,38 @@
             size_hint: 0.4,0.2
             pos_hint:{'center_x':0.5}
             on_release: root.dismiss()
+
+<PopupEditarTask@Popup>:
+    auto_dismiss: False
+    size_hint: 0.8, 0.8
+    pos_hint: {'center_x': 0.5}
+    title: 'Editar Task'
+    StackLayout:
+        TextInput:
+            id: input_title_edit
+            size_hint: 1, 0.1
+            text_size: self.width, None
+            #height: self.texture_size[1]
+        ScrollView:
+            do_scroll_y: True
+            do_scroll_x: False
+            size_hint: 1,0.8
+            TextInput:
+                id: input_detalhes_edit
+                size_hint: 1,0.8
+                text_size: self.width, None
+                #height: self.texture_size[1]
+        MDIconButton:
+            icon:'close'
+            size_hint: 0.5,None
+            on_release: root.dismiss()
+        MDIconButton:
+            icon: 'check'
+            size_hint: 0.5,None
+            on_release:
+                app.root.get_screen('TasksList').commit_edit_task(root.id_task, root.widget_task, root.ids.input_title_edit.text, root.ids.input_detalhes_edit.text)
+                root.dismiss()
+
 
 <MenuInicial>:
     BoxLayout:

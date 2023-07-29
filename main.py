@@ -3,7 +3,7 @@ from kivymd.uix.screen import Screen
 from kivymd.uix.screenmanager import ScreenManager
 from kivymd.uix.list import ThreeLineIconListItem, IconLeftWidget
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, NumericProperty
+from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from datetime import datetime
 from kivy.uix.popup import Popup
 import sqlite3
@@ -14,11 +14,23 @@ conn = sqlite3.connect('.\\tasks.db')
 conn.close()
 
 class PopupDetalhes(Popup):
+    detalhes_task = StringProperty()
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.id_task = NumericProperty(None)
         self.widget_task = ObjectProperty(None)
 
+class PopupEditarTask(Popup):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.id_task = NumericProperty(None)
+        self.widget_task = ObjectProperty(None)
+
+class PopupConfirmaExclusao(Popup):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.id_task = NumericProperty(None)
+        self.widget_task = ObjectProperty(None)
 class TaskIco(IconLeftWidget):
     id_task = ObjectProperty(None)
 
@@ -87,8 +99,7 @@ class TasksList(Screen):
                     WHERE id_tarefa = ?""",(new_status,int_id_task))
         conn.commit()
         conn.close()
-
-    def delete_task(self, id, widget):
+    def confirm_delete_task(self, id, widget):
         conn = sqlite3.connect('.\\tasks.db')
         cur = conn.cursor()
         cur.execute("""DELETE FROM Tarefas WHERE id_tarefa = ?""", [int(id)])
@@ -96,6 +107,39 @@ class TasksList(Screen):
         conn.close()
         self.ids.list_view.remove_widget(widget)
 
+    def delete_task(self, id, widget):
+        pop = PopupConfirmaExclusao()
+        pop.id_task = id
+        pop.widget_task = widget
+        pop.open()
+    
+    def edit_task(self, id, widget):
+        conn = sqlite3.connect('.\\tasks.db')
+        cur = conn.cursor()
+        cur.execute("""SELECT nome_tarefa, subtitulo_tarefa from Tarefas
+                    WHERE id_tarefa = ?""",[int(id)])
+        task_info = cur.fetchone()
+        pop = PopupEditarTask()
+        pop.ids.input_title_edit.text = task_info[0]
+        pop.ids.input_detalhes_edit.text = task_info[1]
+        pop.id_task = id
+        pop.widget_task = widget
+        conn.close()
+        pop.open()
+    
+    def commit_edit_task(self, id, widget, new_title, new_description):
+        if str(new_title) == "" or str(new_title).isspace():
+            Factory.PopupError().open()
+        else:
+            conn = sqlite3.connect('.\\tasks.db')
+            cur = conn.cursor()
+            cur.execute("""UPDATE Tarefas 
+                        set nome_tarefa= ?, subtitulo_tarefa = ?
+                        WHERE id_tarefa = ?""",(str(new_title), str(new_description), int(id)))
+            conn.commit()
+            widget.text = str(new_title)
+            self.detalhes(widget)
+            conn.close()
 
 class CreateTask(Screen):
     def insert_task(self):
