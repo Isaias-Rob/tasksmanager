@@ -39,10 +39,16 @@ class MenuInicial(Screen):
 
 class TasksList(Screen):
     def build(self):
+        self.destroy()
         conn = sqlite3.connect('.\\tasks.db')
         cur = conn.cursor()
-        cur.execute("""Select * from Tarefas;
-        """)
+        if not str(self.ids.search_input.text) == '':
+            cur.execute("""Select * from Tarefas
+            WHERE nome_tarefa LIKE ?;
+            """, [str('%'+str(self.ids.search_input.text)+'%')])
+        else:
+            cur.execute("""Select * from Tarefas;
+            """)
         for linha in cur.fetchall():
             if linha[4] == 0:
                 bg = 'black'
@@ -157,8 +163,8 @@ class CreateTask(Screen):
                         """, (nome_task, desc_task, data_hoje))
             conn.commit()
             conn.close()
-            self.ids.nome_tarefa.text = 'Nome da tarefa'
-            self.ids.descricao_tarefa.text='Descricao da tarefa'
+            self.ids.nome_tarefa.text = ''
+            self.ids.descricao_tarefa.text=''
             Factory.PopupTarefaCriada().open()
 
 

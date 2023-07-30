@@ -150,33 +150,45 @@
                     root.manager.transition.direction = 'right'
                     root.manager.current = 'CreateTask'
 <TasksList>:
-    BoxLayout:
-        orientation: 'vertical'
-        ScrollView:
-            do_scroll_y: True
-            do_scroll_x: False
-            MDList:
-                id: list_view
-        Button:
-            text:'Voltar'
-            size_hint: (0.7, 0.1)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    StackLayout:
+        MDIconButton:
+            icon:'keyboard-backspace'
+            size_hint: (0.1, 0.05)
+            pos_hint: {'center_x': 1}
             on_release:
                 root.destroy()
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'MenuInicial'
+        MDIconButton:
+            icon: 'magnify'
+            size_hint: 0.1,0.05
+            on_release:
+                root.build()
+        TextInput:
+            id: search_input
+            hint_text: 'Buscar por nome de tarefa...'
+            multiline: False
+            size_hint: (0.8,0.05)
+            on_text_validate:
+                root.build()
+        ScrollView:
+            do_scroll_y: True
+            do_scroll_x: False
+            size_hint: (1,0.8)
+            MDList:
+                id: list_view
 <CreateTask>:
     FloatLayout:
         TextInput:
             id: nome_tarefa
-            text: 'Nome da tarefa'
+            hint_text: 'Nome da tarefa'
             multiline: False
             size_hint: (0.8,0.05)
             pos_hint: {'center_x': 0.5, 'y': 0.8}
             write_tab: False
         TextInput:
             id: descricao_tarefa
-            text: 'Descricao da tarefa'
+            hint_text: 'Descricao da tarefa'
             size_hint: (0.8,0.5)
             pos_hint: {'center_x': 0.5, 'y':0.3}
         Button:
