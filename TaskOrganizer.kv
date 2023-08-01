@@ -53,17 +53,23 @@
                 height: self.texture_size[1]
         MDIconButton:
             icon:'keyboard-backspace'
-            size_hint: 0.33,None
+            size_hint: 0.25,None
             on_release: root.dismiss()
         MDIconButton:
             icon: 'pencil-outline'
-            size_hint: 0.33,None
+            size_hint: 0.25,None
             on_release:
                 app.root.get_screen('TasksList').edit_task(root.id_task, root.widget_task)
                 root.dismiss()
         MDIconButton:
+            icon: 'note-text-outline'
+            size_hint: 0.25,None
+            on_release:
+                app.root.get_screen('CreateTask').insert_task(root.id_task, root.widget_task)
+                app.root.get_screen('TasksList').build()
+        MDIconButton:
             icon: 'trash-can-outline'
-            size_hint: 0.33,None
+            size_hint: 0.25,None
             on_release: 
                 app.root.get_screen('TasksList').delete_task(root.id_task, root.widget_task)
                 root.dismiss()
@@ -174,7 +180,7 @@
         ScrollView:
             do_scroll_y: True
             do_scroll_x: False
-            size_hint: (1,0.8)
+            size_hint: (1,0.95)
             MDList:
                 id: list_view
 <CreateTask>:

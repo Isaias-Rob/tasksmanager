@@ -148,9 +148,19 @@ class TasksList(Screen):
             conn.close()
 
 class CreateTask(Screen):
-    def insert_task(self):
-        nome_task = self.ids.nome_tarefa.text
-        desc_task = self.ids.descricao_tarefa.text
+    def insert_task(self, id_task = None, widget_task = None):
+
+        if id_task == None and widget_task == None:
+            nome_task = self.ids.nome_tarefa.text
+            desc_task = self.ids.descricao_tarefa.text
+        else:
+            conn = sqlite3.connect('.\\tasks.db')
+            cur = conn.cursor()
+            cur.execute("""SELECT nome_tarefa, subtitulo_tarefa from Tarefas
+            WHERE id_tarefa = ?""",[int(id_task)])
+            task = cur.fetchone()
+            nome_task = task[0]
+            desc_task = task[1]
 
         if nome_task == "" or nome_task.isspace():
             Factory.PopupError().open()
