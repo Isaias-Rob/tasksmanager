@@ -1,7 +1,7 @@
 from kivymd.app import MDApp
 from kivymd.uix.screen import Screen 
 from kivymd.uix.screenmanager import ScreenManager
-from kivymd.uix.list import ThreeLineIconListItem, IconLeftWidget
+from kivymd.uix.list import ThreeLineAvatarIconListItem, IconLeftWidget, IconRightWidget
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from datetime import datetime
@@ -31,8 +31,19 @@ class PopupConfirmaExclusao(Popup):
         super().__init__(**kwargs)
         self.id_task = NumericProperty(None)
         self.widget_task = ObjectProperty(None)
-class TaskIco(IconLeftWidget):
-    id_task = ObjectProperty(None)
+
+class PopupConfirmaExclusaoMassa(Popup):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+class TaskIco(IconRightWidget):
+    id_mark = NumericProperty(None)
+
+class TaskIconList(ThreeLineAvatarIconListItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.marked = NumericProperty(None)
+        self.id_mark = NumericProperty(None)
 
 class MenuInicial(Screen):
     pass
@@ -57,7 +68,11 @@ class TasksList(Screen):
                 bg = 'green'
                 ico = 'check'
             ico_widget= IconLeftWidget(icon=ico,on_release=self.change_status_task)
-            widget = ThreeLineIconListItem(ico_widget,text=linha[1],secondary_text=str('Criado em '+linha[3]),tertiary_text=str('ID #'+str(linha[0])),on_release=self.detalhes,bg_color=bg)
+            ico_widget_select = TaskIco(icon='checkbox-blank-outline',on_release=self.marked_task)
+            ico_widget_select.id_mark = linha[0]
+            widget = TaskIconList(ico_widget,ico_widget_select,text=linha[1],secondary_text=str('Criado em '+linha[3]),tertiary_text=str('ID #'+str(linha[0])),on_release=self.detalhes,bg_color=bg)
+            widget.marked = 0
+            widget.id_mark = linha[0]
             ico_widget.id_task = widget
             self.ids.list_view.add_widget(widget)
         conn.close()
@@ -105,6 +120,7 @@ class TasksList(Screen):
                     WHERE id_tarefa = ?""",(new_status,int_id_task))
         conn.commit()
         conn.close()
+
     def confirm_delete_task(self, id, widget):
         conn = sqlite3.connect('.\\tasks.db')
         cur = conn.cursor()
@@ -147,6 +163,46 @@ class TasksList(Screen):
             self.detalhes(widget)
             conn.close()
 
+    def marked_task(self, widget):
+        task = self.return_row(widget)
+        if widget.icon == 'checkbox-marked':
+            widget.icon = 'checkbox-blank-outline'
+            task.marked = 0
+        else:
+            widget.icon = 'checkbox-marked'
+            task.marked = 1
+    
+    def return_row(self, widget):
+        rows = [i for i in self.ids.list_view.children]
+        for row in rows:
+            if row.id_mark == widget.id_mark:
+                return row
+    
+    def delete_mass_task(self):
+        pop = PopupConfirmaExclusaoMassa()
+        pop.open()
+    
+    def confirm_delete_mass_task(self):
+        lista_exclusao = []
+        rows = [i for i in self.ids.list_view.children]
+        for row in rows:
+            if row.marked == 1:
+                self.ids.list_view.remove_widget(row)
+                lista_exclusao.append(row.id_mark)
+
+        conn = sqlite3.connect('.\\tasks.db')
+        cur = conn.cursor()
+
+        for elemento_exclusao in lista_exclusao:
+            cur.execute("""DELETE FROM Tarefas 
+                        WHERE id_tarefa = ?""", 
+                        [int(elemento_exclusao)])
+            conn.commit()
+        conn.close()
+
+        
+        
+        
 class CreateTask(Screen):
     def insert_task(self, id_task = None, widget_task = None):
 

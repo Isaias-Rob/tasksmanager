@@ -36,6 +36,30 @@
                 app.root.get_screen('TasksList').confirm_delete_task(root.id_task, root.widget_task)
                 root.dismiss()
 
+<PopupConfirmaExclusaoMassa@Popup>:
+    auto_dismiss: False
+    size_hint: 0.6, 0.4
+    pos_hint: {'x': 0.2, 'top': 0.9}
+    title: 'Cuidado!'
+    StackLayout:
+        Label:
+            text: 'Confirma Exclusão EM MASSA?\nEssa ação não pode ser desfeita.'
+            size_hint: 1, 0.7
+            text_size: self.width, None
+            height: self.texture_size[1]
+            pos_hint:{'center_y':0.5}
+        MDIconButton:
+            icon:'close'
+            size_hint: 0.5,None
+            on_release:
+                root.dismiss()
+        MDIconButton:
+            icon: 'check'
+            size_hint: 0.5,None
+            on_release:
+                app.root.get_screen('TasksList').confirm_delete_mass_task()
+                root.dismiss()
+
 <PopupDetalhes@Popup>:
     auto_dismiss: False
     size_hint: 0.8, 0.8
@@ -102,6 +126,7 @@
             id: input_title_edit
             size_hint: 1, 0.1
             text_size: self.width, None
+            write_tab: False
             #height: self.texture_size[1]
         ScrollView:
             do_scroll_y: True
@@ -174,9 +199,14 @@
             id: search_input
             hint_text: 'Buscar por nome de tarefa...'
             multiline: False
-            size_hint: (0.8,0.05)
+            size_hint: (0.7,0.05)
             on_text_validate:
                 root.build()
+        MDIconButton:
+            icon: 'delete-outline'
+            size_hint: 0.1,0.05
+            on_release:
+                root.delete_mass_task()
         ScrollView:
             do_scroll_y: True
             do_scroll_x: False
