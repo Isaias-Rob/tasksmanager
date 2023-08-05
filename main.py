@@ -6,6 +6,7 @@ from kivy.factory import Factory
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from datetime import datetime
 from kivy.uix.popup import Popup
+from kivymd.uix.button import MDIconButton
 import sqlite3
 
 #RECICYCLE VIEW SERA IMPLEMENTADO NO FUTURO
@@ -68,7 +69,7 @@ class TasksList(Screen):
                 bg = 'green'
                 ico = 'check'
             ico_widget= IconLeftWidget(icon=ico,on_release=self.change_status_task)
-            ico_widget_select = TaskIco(icon='checkbox-blank-outline',on_release=self.marked_task)
+            ico_widget_select = TaskIco(icon='checkbox-blank-outline',on_release=self.marked_task, opacity=0, disabled=True, id='check')
             ico_widget_select.id_mark = linha[0]
             widget = TaskIconList(ico_widget,ico_widget_select,text=linha[1],secondary_text=str('Criado em '+linha[3]),tertiary_text=str('ID #'+str(linha[0])),on_release=self.detalhes,bg_color=bg)
             widget.marked = 0
@@ -199,6 +200,26 @@ class TasksList(Screen):
                         [int(elemento_exclusao)])
             conn.commit()
         conn.close()
+    
+    def check_enable_disable_delete(self):
+        print(self.ids.check_box_delete.icon_color)
+        if self.ids.check_box_delete.icon_color == [1.0, 1.0, 1.0, 1.0]:
+            rows = [i for i in self.ids.list_view.children]
+            for row in rows:
+                row.ids.check.opacity = 1
+                self.ids.check_box_delete.icon_color = [1.0, 1.0, 0, 1.0]
+                row.ids.check.disabled = False
+                self.ids.trash_button.opacity = 1
+                self.ids.trash_button.disabled = False
+        else:
+            rows = [i for i in self.ids.list_view.children]
+            for row in rows:
+                row.ids.check.opacity = 0
+                self.ids.check_box_delete.icon_color = [1.0, 1.0, 1.0, 1.0]
+                row.ids.check.disabled = True
+                self.ids.trash_button.opacity = 0
+                self.ids.trash_button.disabled = True
+                row.marked = 0
 
         
         

@@ -199,12 +199,23 @@
             id: search_input
             hint_text: 'Buscar por nome de tarefa...'
             multiline: False
-            size_hint: (0.7,0.05)
+            size_hint: (0.6,0.05)
             on_text_validate:
                 root.build()
         MDIconButton:
+            id: check_box_delete
+            icon: 'checkbox-marked-outline'
+            size_hint: 0.1,0.05
+            theme_icon_color: 'Custom'
+            icon_color: 'white'
+            on_release:
+                root.check_enable_disable_delete()
+        MDIconButton:
+            id: trash_button
             icon: 'delete-outline'
             size_hint: 0.1,0.05
+            opacity: 0
+            disabled: True
             on_release:
                 root.delete_mass_task()
         ScrollView:
